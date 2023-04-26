@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 project(DemoGafferExtension)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 if(APPLE)
   set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
-endif(APPLE)
+elseif (WIN32)
+  set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
+endif()
 
 # build the library
 file( GLOB DemoGafferExtensionSrc src/DemoGafferExtension/*.cpp )
@@ -26,13 +28,17 @@ target_link_libraries( DemoGafferExtensionModule DemoGafferExtension )
 
 string(REPLACE "." "" PYTHON_VERSION_STRIPPED ${PYTHON_VERSION})
 string(REPLACE "3.7" "3.7m" PYTHON_FOLDER ${PYTHON_VERSION})
+
 if(APPLE)
   target_include_directories( DemoGafferExtensionModule PRIVATE include ${GAFFER_ROOT}/include ${GAFFER_ROOT}/lib/Python.framework/Versions/${PYTHON_VERSION}/include/python${PYTHON_VERSION} )
   target_link_libraries( DemoGafferExtensionModule GafferBindings IECorePython boost_python Python)
+elseif(WIN32)
+  target_include_directories( DemoGafferExtensionModule PRIVATE include ${GAFFER_ROOT}/include ${PYTHON_ROOT}/include)
+  target_link_libraries( DemoGafferExtensionModule GafferBindings IECorePython boost_python${PYTHON_VERSION_STRIPPED} ${PYTHON_ROOT}/libs/python${PYTHON_VERSION_STRIPPED}.lib)
 else()
   target_include_directories( DemoGafferExtensionModule PRIVATE include ${GAFFER_ROOT}/include ${GAFFER_ROOT}/include/python${PYTHON_FOLDER})
   target_link_libraries( DemoGafferExtensionModule GafferBindings IECorePython boost_python${PYTHON_VERSION_STRIPPED} python${PYTHON_FOLDER})
-endif(APPLE)
+endif()
 
 install( TARGETS DemoGafferExtensionModule DESTINATION python/DemoGafferExtension )
 
@@ -51,5 +57,3 @@ install( DIRECTORY startup DESTINATION . FILES_MATCHING PATTERN "*.py" )
 
 # build the extra resources
 install( DIRECTORY resources DESTINATION . FILES_MATCHING PATTERN "*.gfr" PERMISSIONS OWNER_READ GROUP_READ WORLD_READ )
-
-
