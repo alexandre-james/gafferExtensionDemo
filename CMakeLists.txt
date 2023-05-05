@@ -3,11 +3,11 @@ project(DemoGafferExtension)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
-set(BOOST_ALL_NO_LIB 1)
 
 if(APPLE)
   set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 elseif (WIN32)
+  add_definitions(-DBOOST_ALL_NO_LIB=1)
   set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
 endif()
 
